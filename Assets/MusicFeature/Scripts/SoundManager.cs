@@ -32,12 +32,25 @@ public class SoundManager : MonoBehaviour
             {
                 out_of_zona = 0;
                 audio_controller.volume = 1f;
+                hall.Pause();
                 return true;
             }
             else if (on_last_distance > user_dist)
             {
                 out_of_zona = 0;
                 audio_controller.volume = 1 - (user_dist - on_distance) / (on_last_distance - on_distance);
+                if (on_distance < user_dist)
+                {
+                    if (!hall.isPlaying)
+                    {
+                        hall.UnPause();
+                    }
+                    else
+                    {
+                        hall.volume = (user_dist - on_distance) / (on_last_distance - on_distance);
+                    }
+                }
+
             }
             else
             {
@@ -49,6 +62,7 @@ public class SoundManager : MonoBehaviour
             Debug.Log(hall.volume);
             if (on_distance > user_dist)
             {
+                hall.volume = 0f;
                 out_of_zona = 0;
                 audio_controller.volume = 1f;
                 return true;
@@ -80,23 +94,28 @@ public class SoundManager : MonoBehaviour
         out_of_zona += Time.deltaTime;
         if (IsExit())
         {
-            //Debug.Log("IsExit");
             audio_controller.Stop();
             audio_controller.volume = 1f;
-            //hall.UnPause();
-            //if (hall.volume < 0.1f)
-            //    hall.volume = 1f;
-        } else
-        {
-            Debug.Log("Is NOT Exit");
-            if (!audio_controller.isPlaying)
             {
-                audio_controller.Play();
-            } else
-            {
-                hall.Pause();
+                Debug.Log("Is NOT Exit");
+                if (!audio_controller.isPlaying)
+                {
+                    audio_controller.Play();
+                }
+                else
+                {
+                    if (hall.volume == 0)
+                        hall.Pause();
+                }
             }
-        }
 
+        }
+    }
+
+    private void OnGUI()
+    {
+        GUI.Label(new Rect(30, 200, 200, 200), (user_dist - on_distance) + " " + (on_last_distance - on_distance));
+        Debug.Log("H " + (user_dist - on_distance));
+        Debug.Log("L " + (on_last_distance - on_distance));
     }
 }
